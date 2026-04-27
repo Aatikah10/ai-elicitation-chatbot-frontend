@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>REQ·AI — AI Requirement Elicitation Chatbot</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
+:root {
+  --bg: #0b0d12;
+  --surface: #131720;
+  --surface2: #191e2c;
+  --surface3: #1f2638;
+  --border: #252c40;
+  --border2: #2f3852;
+  --accent: #5b7cfa;
+  --accent-h: #4a6be8;
+  --accent2: #34d399;
+  --accent3: #f59e0b;
+  --danger: #f06565;
+  --purple: #a78bfa;
+  --text: #e2e8f4;
+  --text2: #8993b0;
+  --text3: #515c7a;
+  --sidebar-w: 224px;
+  --topbar-h: 54px;
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+/* ─── BUTTONS ─── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#fff !important;}
+.btn-primary:hover{background:var(--accent-h);box-shadow:0 0 0 3px rgba(91,124,250,.2);}
+.btn-success{background:var(--accent2);color:#0b0d12 !important;}
+.btn-success:hover{background:#28c185;}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.btn-ghost:hover{color:var(--text);border-color:var(--accent);}
+.btn-danger{background:var(--danger);color:#fff !important;}
+.btn-sm{padding:6px 13px;font-size:12.5px;border-radius:8px;}
+.btn-lg{padding:13px 28px;font-size:15px;border-radius:var(--radius-lg);}
+.btn-xl{padding:15px 34px;font-size:16px;border-radius:var(--radius-lg);}
+
+/* ─── BADGES ─── */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;font-family:'Space Mono',monospace;}
+.badge-blue{background:rgba(91,124,250,.14);color:var(--accent);border:1px solid rgba(91,124,250,.2);}
+.badge-live{background:rgba(52,211,153,.14);color:var(--accent2);border:1px solid rgba(52,211,153,.2);}
+.badge-live::before{content:'●';font-size:8px;}
+
+/* ─── FORMS ─── */
+.form-group{margin-bottom:16px;}
+label{font-size:12px;font-weight:600;color:var(--text2);display:block;margin-bottom:6px;letter-spacing:.3px;}
+input,select,textarea{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .15s;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);}
+
+/* ─── CARDS ─── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;}
+.card-title{font-size:10.5px;font-weight:700;letter-spacing:1.8px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;}
+.card-value{font-family:'Space Mono',monospace;font-size:30px;font-weight:700;line-height:1;}
+.card-sub{font-size:12px;color:var(--text2);margin-top:6px;}
+
+/* ─── SCREEN SYSTEM ─── */
+.screen{display:none;min-height:100vh;}
+.screen.active{display:block;}
+.page{display:none;}
+.page.active{display:block;}
+
+.sidebar{
+  width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:200;
+}
+.app-main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+
+/* ─── LANDING ─── */
+.land-nav{
+  position:fixed;top:0;left:0;right:0;z-index:300;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 60px;
+  background:rgba(11,13,18,.88);backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(37,44,64,.6);
+}
+.land-links{display:flex;gap:30px;}
+.land-links a{text-decoration:none;color:var(--text2);font-size:13.5px;transition:all .2s;}
+.land-links a:hover{color:var(--text);}
+.land-logo{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--accent);letter-spacing:3px;cursor:pointer;}
+
+.hero{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  text-align:center;padding:130px 40px 80px;position:relative;overflow:hidden;
+}
+.hero-mesh{
+  position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(ellipse 90% 65% at 50% -5%,rgba(91,124,250,.13) 0%,transparent 65%),
+    radial-gradient(ellipse 55% 45% at 85% 85%,rgba(52,211,153,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 40% at 15% 70%,rgba(167,139,250,.05) 0%,transparent 60%);
+}
+.hero-grid{
+  position:absolute;inset:0;z-index:0;
+  background-image:linear-gradient(rgba(37,44,64,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(37,44,64,.3) 1px,transparent 1px);
+  background-size:52px 52px;
+  mask-image:radial-gradient(ellipse 85% 85% at 50% 50%,black 20%,transparent 78%);
+}
+.hero-content{position:relative;z-index:1;max-width:740px;}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:2.5px;
+  text-transform:uppercase;color:var(--accent);background:rgba(91,124,250,.1);border:1px solid rgba(91,124,250,.22);
+  padding:6px 16px;border-radius:20px;margin-bottom:30px;
+}
+.hero-title{font-size:62px;font-weight:700;line-height:1.08;margin-bottom:22px;letter-spacing:-2px;}
+.hero-sub{font-size:17px;color:var(--text2);line-height:1.75;max-width:560px;margin:0 auto 38px;}
+.hero-btns{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.hero-stats{
+  display:flex;gap:52px;justify-content:center;margin-top:70px;padding-top:42px;
+  border-top:1px solid var(--border);
+}
+.hstat-num{font-family:'Space Mono',monospace;font-size:30px;font-weight:700;}
+.hstat-lbl{font-size:11.5px;color:var(--text3);margin-top:5px;letter-spacing:.5px;}
+
+/* ─── TOPBAR ─── */
+.topbar{
+  height:var(--topbar-h);background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 26px;position:sticky;top:0;z-index:100;
+}
+.topbar-right{display:flex;gap:12px;align-items:center;}
+.avatar{
+  width:28px;height:28px;background:linear-gradient(to bottom right, var(--accent), var(--purple));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;cursor:pointer;
+}
+
+/* ─── SIDEBAR ITEM ACTIVE ─── */
+.sb-item.active{
+  color:var(--accent) !important;
+  background:rgba(91,124,250,0.09);
+  border-left:3px solid var(--accent);
+}
+.sb-item{
+  display:flex;align-items:center;gap:12px;padding:10px 20px;cursor:pointer;fontSize:13.5px;color:var(--text2);border-left:3px solid transparent;transition:all .15s;textDecoration:none;
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .55s ease both;}
+.fade-up-1{animation:fadeUp .55s 0.1s ease both;}
+.fade-up-2{animation:fadeUp .55s 0.22s ease both;}
+.fade-up-3{animation:fadeUp .55s 0.34s ease both;}
+.fade-up-4{animation:fadeUp .55s 0.46s ease both;}
+
+</style>
+</head>
+<body>
+
+<!-- LANDING SCREEN -->
+<div id="scr-landing" class="screen active">
+  <nav class="land-nav">
+    <div class="land-logo">REQ·AI</div>
+    <div class="land-links">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+    </div>
+    <div class="land-nav-right">
+      <button class="btn btn-ghost btn-sm" onclick="showScreen('scr-login')">Log In</button>
+      <button class="btn btn-primary btn-sm" onclick="showScreen('scr-signup')">Get Started →</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-mesh"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <div class="hero-eyebrow fade-up">⚡ FYP · BSSE 2025 · IIUI · FCIT</div>
+      <h1 class="hero-title fade-up-1">
+        Elicit Requirements<br/>with <span style="color:var(--accent)">AI-Powered</span><br/><span style="color:var(--accent2)">Conversation</span>
+      </h1>
+      <p class="hero-sub fade-up-2">
+        Stop struggling with incomplete, ambiguous requirements. Our AI chatbot guides stakeholders through natural conversations to extract, classify, and document system requirements.
+      </p>
+      <div class="hero-btns fade-up-3">
+        <button class="btn btn-primary btn-xl" onclick="showScreen('scr-signup')">Start Eliciting Free →</button>
+        <button class="btn btn-ghost btn-xl" onclick="showScreen('scr-login')">Sign In</button>
+      </div>
+      <div class="hero-stats fade-up-4">
+        <div><div class="hstat-num" style="color:var(--accent)">91%</div><div class="hstat-lbl">Avg. Confidence</div></div>
+        <div><div class="hstat-num" style="color:var(--accent2)">3.9×</div><div class="hstat-lbl">Faster Elicitation</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div id="scr-login" class="screen" style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px;">
+  <div class="card" style="width:100%; max-width:400px; padding:40px;">
+    <div onclick="showScreen('scr-landing')" style="cursor:pointer; font-size:12px; color:var(--text3); margin-bottom:20px;">← Back</div>
+    <div class="land-logo" style="text-align:center; margin-bottom:20px;">REQ·AI</div>
+    <h2 style="text-align:center; margin-bottom:20px;">Welcome back</h2>
+    <form onsubmit="event.preventDefault(); showScreen('scr-app')">
+      <div class="form-group"><label>Email</label><input type="email" placeholder="you@example.com"/></div>
+      <div class="form-group"><label>Password</label><input type="password" placeholder="••••••••"/></div>
+      <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Sign In →</button>
+    </form>
+    <button class="btn btn-ghost" style="width:100%; justify-content:center; margin-top:20px;" onclick="showScreen('scr-app')">Demo Login</button>
+  </div>
+</div>
+
+<!-- SIGNUP SCREEN -->
+<div id="scr-signup" class="screen" style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px;">
+  <div class="card" style="width:100%; max-width:400px; padding:40px;">
+    <div onclick="showScreen('scr-landing')" style="cursor:pointer; font-size:12px; color:var(--text3); margin-bottom:20px;">← Back</div>
+    <div class="land-logo" style="text-align:center; margin-bottom:20px;">REQ·AI</div>
+    <h2 style="text-align:center; margin-bottom:20px;">Get started</h2>
+    <form onsubmit="event.preventDefault(); showScreen('scr-app')">
+      <div class="form-group"><label>Full Name</label><input placeholder="Ali Hassan"/></div>
+      <div class="form-group"><label>Email</label><input type="email" placeholder="you@example.com"/></div>
+      <div class="form-group"><label>Password</label><input type="password"/></div>
+      <button type="submit" class="btn btn-success" style="width:100%; justify-content:center;">Create Account</button>
+    </form>
+  </div>
+</div>
+
+<!-- MAIN APP SCREEN -->
+<div id="scr-app" class="screen">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div style="padding:16px 20px; border-bottom:1px solid var(--border)">
+      <div class="land-logo">REQ·AI</div>
+    </div>
+    <nav style="flex:1; padding:12px 0;">
+      <div class="sb-item active" onclick="showPage('page-dashboard')">Dashboard</div>
+      <div class="sb-item" onclick="showPage('page-chat')">Chat</div>
+    </nav>
+  </div>
+
+  <div class="app-main">
+    <header class="topbar">
+      <div class="section-title">Dashboard</div>
+      <div class="topbar-right">
+        <span class="badge badge-live">Live</span>
+        <div class="avatar">A</div>
+      </div>
+    </header>
+
+    <!-- DASHBOARD PAGE -->
+    <div id="page-dashboard" class="page active" style="padding:28px 32px">
+      <div style="margin-bottom:22px;">
+        <div class="section-title">Dashboard Overview</div>
+        <div class="page-sub">Welcome back, Ali.</div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:16px;">
+        <div class="card"><div class="card-title">Active Projects</div><div class="card-value" style="color:var(--accent)">3</div></div>
+        <div class="card"><div className="card-title">Confidence</div><div className="card-value" style="color:var(--accent2)">91%</div></div>
+      </div>
+    </div>
+
+    <!-- CHAT PAGE -->
+    <div id="page-chat" class="page" style="padding:28px 32px">
+      <div class="section-title">AI Chatbot</div>
+      <div class="card" style="margin-top:20px; height:400px; display:flex; flex-direction:column; justify-content:flex-end">
+        <div style="padding:20px; border-top:1px solid var(--border); display:flex; gap:12px">
+          <input placeholder="Type your message..." style="flex:1"/>
+          <button class="btn btn-primary">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  if(event) event.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>

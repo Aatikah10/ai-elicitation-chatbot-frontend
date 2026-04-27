@@ -1,34 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import StoreProvider from "./StoreProvider";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
-  title: "AI Chatbot | Requirement Elicitation",
-  description: "Next-gen AI powered requirement elicitation chatbot",
+  title: "REQ·AI — AI Requirement Elicitation Chatbot",
+  description: "Smart, emotion-aware chatbot to gather accurate software requirements",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased selection:bg-indigo-50 selection:text-indigo-600`}
-      >
-        <StoreProvider>{children}</StoreProvider>
+      <body>
+        <div className="app-container">
+          {children}
+        </div>
       </body>
     </html>
   );
